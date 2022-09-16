@@ -7,28 +7,26 @@
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
         <q-toolbar-title>
-          <q-avatar square>
+          <q-avatar square style="border-radius: 3px">
             <img src="~assets/logo.svg">
           </q-avatar>
-          Lil-Inventory
+          <span style="margin-left: 10px;">lil-inventory</span>
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
 
     <q-drawer persistent show-if-above v-model="leftDrawerOpen" side="left" bordered>
-      <div style="display: table; margin: 0; width: 100%; height: 100%;">
-        <div style="display: table-row; width: 100%;">
-          <inventory @select="onInventorySelect" @auth-failure="$refs.login.open('Session Ended')" />
-        </div>
-        <div style="display: table-row; width: 100%; height: 100%;">
-          <navigation ref="navigation" @auth-failure="$refs.login.open('Session Ended')" />
-        </div>
-        <div style="display: table-row; width: 100%; ">
-          <q-btn unelevated icon="add" color="primary" label="Group" size="sm" style="width: calc(50% - 4px); margin: 2px;" />
-          <q-btn unelevated icon="add" color="primary" label="Asset" size="sm" style="width: calc(50% - 4px); margin: 2px;" />
-        </div>
-      </div>
-    </q-drawer>
+      <navigation
+        ref="navigation"
+        @inventory-select="onInventorySelect"
+        @group-select="onGroupSelect"
+        @group-create="onNewGroup"
+        @group-delete=""
+        @asset-select="onAssetSelect"
+        @asset-create="onNewAsset"
+        @asset-delete=""
+        @auth-failure="" />
+    </q-drawer>    
 
     <q-page-container>
       <router-view />
@@ -40,14 +38,20 @@
 <script>
 import { ref } from 'vue'
 import LoginDialog from 'src/components/LoginDialog.vue'
-import Inventory from 'src/components/Inventory.vue'
-import Navigation from 'src/components/Navigation.vue'
+import Navigation from 'src/components/navigation/Navigation.vue'
+
 
 export default {
   components: {
-    inventory: Inventory,
     navigation: Navigation,
-    loginDialog: LoginDialog
+    loginDialog: LoginDialog,
+},
+  data() {
+    return {
+      inventory: null,
+      group: null,
+      asset: null
+    }
   },
   setup () {
     const leftDrawerOpen = ref(false)
@@ -56,15 +60,35 @@ export default {
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
-      },
-      opts: ['Apple', 'Booba', 'Cat'],
-      groups: ['AAA', 'BBBooba', 'CCCC'],
-      assets: ['ABC123', 'XYZ', 'Zipper']
+      }
     }
   },
   methods: {
     onInventorySelect(inventory) {
-      this.$refs.navigation.navigate(inventory.inventoryId)
+      this.$router.push(`/inventory/${inventory.inventoryId}`)
+    },
+    onGroupSelect(group) {
+    },
+    onAssetSelect(asset) {
+      let state = this.$refs.navigation.getState()
+      this.$router.push(`/inventory/${state.inventory.inventoryId}/asset/${asset.assetId}`)
+      console.log(asset)
+    },
+    onNewGroup() {
+      let state = this.$refs.navigation.getState()
+      if(state.group) {
+        this.$router.push(`/inventory/${state.inventory.inventoryId}/group/${state.group.groupId}/create-group`)
+      } else {
+        this.$router.push(`/inventory/${state.inventory.inventoryId}/create-group`)
+      }
+    },
+    onNewAsset() {
+      let state = this.$refs.navigation.getState()
+      if(state.group) {
+        this.$router.push(`/inventory/${state.inventory.inventoryId}/group/${state.group.groupId}/create-asset`)
+      } else {
+        this.$router.push(`/inventory/${state.inventory.inventoryId}/create-asset`)
+      }
     }
   }
 }

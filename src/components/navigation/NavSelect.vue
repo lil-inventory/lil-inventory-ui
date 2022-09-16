@@ -1,7 +1,14 @@
 <script>
 
+
   export default {
-    emits: ['asset-select', 'group-select', 'auth-failure'],
+    emits: [
+      'asset-select',
+      'asset-delete',
+      'group-select',
+      'group-delete',
+      'auth-failure'
+    ],
     data() {
       return {
         selected: null,
@@ -12,12 +19,24 @@
       }
     },
     methods: {
-      deleteItem: function(e) {
+      deleteGroup: function(e, group) {
         e.stopPropagation()
-        alert('delete')
-        // TODO delete logic
+
+        console.log('delete group')
+        console.log(group)
+
+        this.$emit('group-delete', group)
+      },
+      deleteAsset: function(e, asset) {
+        e.stopPropagation()
+
+        console.log('delete asset')
+        console.log(asset)
+
+        this.$emit('asset-delete', asset)
       },
       navigate: function(inventoryId, groupId = null) {
+        this.selected = null
         this.$client.getNavigation(inventoryId, groupId).then(r => {
           if(r.status===200) {
             // ok
@@ -59,7 +78,7 @@
         <q-item-section>
           <div style="display: table">
             <div style="display: table-row; float: right;">
-              <q-btn flat class="delete" size="xs" padding="xs" color="primary" icon="close" @click="deleteItem">
+              <q-btn flat class="delete" size="xs" padding="xs" color="primary" icon="close" @click="deleteGroup($event, group)">
                 <q-tooltip transition-show="flip-right" transition-hide="flip-left" :delay="500" anchor="center right"
                   self="bottom left">Delete</q-tooltip>
               </q-btn>
@@ -74,8 +93,7 @@
 
       <q-item-label v-if="assets.length>0" header>Assets</q-item-label>
 
-      <q-item v-for="asset in assets" clickable v-ripple :active="selected===asset" @click="selected=asset"
-        active-class="my-menu-link">
+      <q-item v-for="asset in assets" clickable v-ripple :active="selected===asset" @click="()=> {selected=asset; $emit('asset-select', asset)}" active-class="my-menu-link">
         <q-item-section avatar top>
           <q-icon name="insert_drive_file" color="primary" />
         </q-item-section>
@@ -87,7 +105,7 @@
         <q-item-section>
           <div style="display: table">
             <div style="display: table-row; float: right;">
-              <q-btn flat class="delete" size="xs" padding="xs" color="primary" icon="close" @click="deleteItem">
+              <q-btn flat class="delete" size="xs" padding="xs" color="primary" icon="close" @click="deleteAsset($event, asset)">
                 <q-tooltip transition-show="flip-right" transition-hide="flip-left" :delay="500" anchor="center right"
                   self="bottom left">Delete</q-tooltip>
               </q-btn>
