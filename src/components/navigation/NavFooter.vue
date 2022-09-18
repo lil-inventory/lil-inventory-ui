@@ -15,3 +15,4 @@
         <q-tooltip transition-show="flip-up" transition-hide="flip-down" :delay="500" anchor="top middle" self="center middle" :offset="[0, 20]">Create New Asset</q-tooltip>
     </q-btn>
 </template>
+

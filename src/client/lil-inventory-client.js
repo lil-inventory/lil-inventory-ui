@@ -65,6 +65,29 @@ export class LilInventoryClient {
         })
     }
 
+    createGroup(inventoryId, name, parentGroupId=null) {
+        const path = `/inventory/${inventoryId}/group`
+        let url = this._url(path, {
+            parentGroupId: parentGroupId,
+            name: name
+        })
+
+        return this._request(url, {
+            method: 'POST',
+            credentials: 'include'
+        })
+    }
+
+    deleteGroup(inventoryId, groupId) {
+        const path = `/inventory/${inventoryId}/group/${groupId}`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'DELETE',
+            credentials: 'include'
+        }, undefined, false)
+    }
+
     /**
      * constructs a url
      * @param {String} path
@@ -72,8 +95,9 @@ export class LilInventoryClient {
      */
     _url(path, params={}) {
         let query = Object.keys(params)
-             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
-             .join('&');
+            .filter(k => params[k]!=null)
+            .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+            .join('&');
         
         return this.baseUrl + path + (query==='' ? '' : '?' + query)
     }
@@ -85,7 +109,7 @@ export class LilInventoryClient {
      * @param {options} JSON
      * @param {canRefresh} boolean if true, automatically refresh the session when needed
      */
-    _request(url, options, canRefresh = true) {
+    _request(url, options, canRefresh = true, hasBody = true) {
 
         if(canRefresh && this.experation!=null && this.experation <= Date.now()) {
             // attempt refresh
@@ -105,7 +129,7 @@ export class LilInventoryClient {
             })
         } else {
             return fetch(url, options).then(r =>  {
-                if(r.status==200) {
+                if(hasBody && r.status==200) {
                     return r.json().then(data => ({
                         status: r.status,
                         body: data

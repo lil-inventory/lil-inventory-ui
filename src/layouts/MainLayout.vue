@@ -25,7 +25,7 @@
         @asset-select="onAssetSelect"
         @asset-create="onNewAsset"
         @asset-delete=""
-        @auth-failure="" />
+        @auth-failure="$refs.login.open('Session Timeout')" />
     </q-drawer>    
 
     <q-page-container>
