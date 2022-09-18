@@ -4,7 +4,6 @@
     import NavInventory from './NavInventory.vue'
     import NavSelect from './NavSelect.vue'
     import NavFooter from './NavFooter.vue'
-    import ConfirmDialog from '../ConfirmDialog.vue'
 
     export default {
         emits: [
@@ -18,7 +17,6 @@
             'auth-failure'
         ],
         components: {
-            confirmDelete: ConfirmDialog,
             navInventory: NavInventory,
             navSelect: NavSelect,
             navFooter: NavFooter
@@ -68,19 +66,7 @@
                 this.$emit('group-create')
             },
             _onGroupDelete(group) {
-                let self = this
-                this.$refs.confirmDelete.open({
-                    messageText: `Are you sure you want to delete group '${group.name}'`,
-                    onAccept: function() {
-                        self._doGroupDelete(group)
-                    }
-                })
-            },
-            _doGroupDelete(group) {
-                this.$client.deleteGroup(group.inventoryId, group.groupId)
-                    .then(()=> {
-                        this.$emit('group-delete')
-                    })
+                this.$emit('group-delete', group)
             },
             _onAssetSelect(asset) {
                 this.asset = asset
@@ -92,19 +78,13 @@
                 this.$emit('asset-create')
             },
             _onAssetDelete(asset) {
-                this.$refs.confirmDelete.open({
-                    messageText: `Are you sure you want to delete asset '${asset.name}'`,
-                    onAccept: function() {
-                        this.$emit('asset-delete', asset)
-                    }
-                })
+                this.$emit('asset-delete', asset)
             }
         }
     }
 </script>
 
 <template>
-    <confirm-delete ref="confirmDelete" icon="delete" />
     <div class="navigation">
         <div class="nav-row">
             <nav-inventory

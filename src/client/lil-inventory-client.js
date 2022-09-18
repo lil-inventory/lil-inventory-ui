@@ -88,6 +88,16 @@ export class LilInventoryClient {
         }, undefined, false)
     }
 
+    deleteAsset(inventoryId, assetId) {
+        const path = `/inventory/${inventoryId}/assets/${assetId}`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'DELETE',
+            credentials: 'include'
+        }, undefined, false)
+    }
+
     /**
      * constructs a url
      * @param {String} path
