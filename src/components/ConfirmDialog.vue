@@ -8,7 +8,8 @@
                 _cancelText: null,
                 _acceptText: null,
                 _onCancel: null,
-                _onAccept: null
+                _onAccept: null,
+                _finally: null
             }
         },
         props: {
@@ -29,27 +30,40 @@
                 this._acceptText = data.acceptText ? data.acceptText : (this.acceptText ? this.acceptText : "Accept")
                 this._onCancel = data.onCancel
                 this._onAccept = data.onAccept
+                this._finally = data.finally
                 this.confirm = true
             },
             _onYes: function() {
                 let accept = this._onAccept
-                
+                let fnly = this._finally
+
                 this.confirm = false
                 this._messageText = null
                 this._onCancel = null
                 this._onAccept = null
-
-                if(accept) accept()
+                this._finally = null
+                
+                try {
+                    if(accept) accept()
+                } finally {
+                    if(fnly) fnly()
+                }
             },
             _onNo: function() {
                 let cancel = this._onCancel
-                
+                let fnly = this._finally
+
                 this.confirm = false
                 this._messageText = null
                 this._onCancel = null
                 this._onAccept = null
-
-                if (cancel) cancel()
+                this._finally = null
+                
+                try {
+                    if (cancel) cancel()
+                } finally {
+                    if(fnly) fnly()
+                }
             }
         }
     }

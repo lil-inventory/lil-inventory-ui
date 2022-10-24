@@ -6,10 +6,9 @@
             }
         },
         methods: {
-            _submit: function(event, inventoryId=this.$route.params.inventoryId, groupId=this.$route.params.groupId, name=this.name) {
-                console.log(`create group: inventory='${inventoryId}', group='${groupId}', name='${name}'`)
-
-                this.$client.createGroup(inventoryId, name, groupId)
+            _submit: function(event, groupId=this.$route.params.groupId, name=this.name) {
+                console.log(`create inventory: name='${name}'`)
+                this.$client.createInventory(name, groupId)
             }
         }
     }

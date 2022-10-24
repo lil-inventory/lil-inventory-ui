@@ -3,50 +3,26 @@
 
   export default {
     emits: [
-      'asset-select',
-      'asset-delete',
       'group-select',
       'group-delete',
-      'auth-failure'
+      'asset-select',
+      'asset-delete'
     ],
     components: {
       confirmDelete: ConfirmDialog
     },
-    data() {
-      return {
-        selected: null,
-        inventoryId: null,
-        groupId: null,
-        path: [],
-        groups: [],
-        assets: []
-      }
+    props: {
+      groups: Array,
+      assets: Array,
+
+      /**
+       * Disables the components
+       */
+      disabled: Boolean,
     },
     methods: {
-      refresh: function() {
-        let selected = this.selected
-        this.navigate(this.$route.params.inventoryId, this.$route.params.groupId)
-        this.selected = selected
-      },
-      navigate: function(inventoryId, groupId = null) {
-        this.selected = null
-        return this.$client.getNavigation(inventoryId, groupId).then(r => {
-          if(r.status===200) {
-            // ok
-            console.log(r)
-            this.inventoryId = r.body.inventoryId
-            this.groupId = r.body.groupId
-            this.path = r.body.path
-            this.groups = r.body.groups
-            this.assets = r.body.assets
-          } else if(r.status===401 || r.status===403) {
-            // auth issue
-            this.$emit('auth-failure')
-          } else {
-            // error
-            // TODO
-          }
-        })
+      _getSelectedAssetId() {
+        return this.$route.params.assetId
       },
       _deleteGroup: function(e, group) {
         e.stopPropagation()
@@ -59,10 +35,6 @@
             messageText: `Are you sure you want to delete group '${group.name}'`,
             onAccept: function() {
               self.$emit('group-delete', group)
-              self.$client.deleteGroup(self.inventoryId, group.groupId)
-                .then(() => {
-                  self.refresh()
-                })
             }
         })
       },
@@ -77,10 +49,6 @@
             messageText: `Are you sure you want to delete asset '${asset.name}'`,
             onAccept: function() {
               self.$emit('asset-delete', asset)
-              self.$client.deleteAsset(self.inventoryId, asset.assetId)
-                .then(() => {
-                  self.refresh()
-                })
             }
         })
       }
@@ -96,8 +64,8 @@
 
       <q-item-label v-if="groups.length>0" header>Groups</q-item-label>
 
-      <q-item v-for="group in groups" clickable v-ripple :active="selected ? selected.groupId===group.groupId : false" active-class="my-menu-link"
-        @click="selected=group">
+      <q-item v-for="group in groups" clickable v-ripple active-class="my-menu-link"
+        @click="()=> {$emit('group-select', group)}">
 
         <q-item-section avatar top>
           <q-icon name="folder" color="primary" />
@@ -125,7 +93,7 @@
 
       <q-item-label v-if="assets.length>0" header>Assets</q-item-label>
 
-      <q-item v-for="asset in assets" clickable v-ripple :active="selected ? selected.assetId===asset.assetId : false" @click="()=> {selected=asset; $emit('asset-select', asset)}" active-class="my-menu-link">
+      <q-item v-for="asset in assets" clickable v-ripple :active="asset.assetId==_getSelectedAssetId()" @click="() => {$emit('asset-select', asset)}" active-class="my-menu-link">
         <q-item-section avatar top>
           <q-icon name="insert_drive_file" color="primary" />
         </q-item-section>

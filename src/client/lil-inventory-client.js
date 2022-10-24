@@ -53,10 +53,77 @@ export class LilInventoryClient {
         })
     }
 
-    getNavigation(inventoryId, groupId = null) {
-        const path = groupId===null
-            ? `/inventory/${inventoryId}/navigation`
-            : `/inventory/${inventoryId}/navigation/${groupId}`
+    getInventory(inventoryId) {
+        const path = `/inventory/${inventoryId}`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'GET',
+            credentials: 'include'
+        })
+    }
+
+    createInventory(name, isPrivate = false) {
+        const path = "/inventory"
+        let url = this._url(path, {
+            name: name,
+            private: isPrivate
+        })
+
+        return this._request(url, {
+            method: 'POST',
+            credentials: 'include'
+        })
+    }
+
+    deleteInventory(inventoryId) {
+        const path = `/inventory/${inventoryId}`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'DELETE',
+            credentials: 'include'
+        }, undefined, false)
+    }
+
+    getNavigation(inventoryId, groupId, assetId) {
+        if(!groupId && !assetId) {
+            return this.getNavigationRoot(inventoryId)
+        } else if (groupId && !assetId) {
+            return this.getNavigationGroup(inventoryId, groupId)
+        } else if (assetId && !groupId) {
+            return this.getNavigationAsset(inventoryId, assetId)
+        } else {
+            throw "both groupid and assetid defined"
+        }
+    }
+
+    getNavigationRoot(inventoryId) {
+        if(!inventoryId) {
+            throw "inventory not defined"
+        }
+
+        const path = `/inventory/${inventoryId}/navigation`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'GET',
+            credentials: 'include'
+        })
+    }
+
+    getNavigationGroup(inventoryId, groupId) {
+        const path = `/inventory/${inventoryId}/navigation/group/${groupId}`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'GET',
+            credentials: 'include'
+        })
+    }
+
+    getNavigationAsset(inventoryId, assetId) {
+        const path = `/inventory/${inventoryId}/navigation/asset/${assetId}`
         let url = this._url(path)
 
         return this._request(url, {
@@ -88,6 +155,24 @@ export class LilInventoryClient {
         }, undefined, false)
     }
 
+    createAsset(inventoryId, groupId, name, barcode) {
+        const path = `/inventory/${inventoryId}/assets`
+        let url = this._url(path)
+
+        return this._request(url, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                name: name,
+                barcode: barcode,
+                groupId: groupId
+            })
+        }, undefined, false)
+    }
+    
     deleteAsset(inventoryId, assetId) {
         const path = `/inventory/${inventoryId}/assets/${assetId}`
         let url = this._url(path)
